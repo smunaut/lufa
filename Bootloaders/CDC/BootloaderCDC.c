@@ -112,6 +112,8 @@ void Application_Jump_Check(void)
  */
 int main(void)
 {
+	int quit_delay = 10000;
+
 	/* Setup hardware required for the bootloader */
 	SetupHardware();
 
@@ -121,11 +123,19 @@ int main(void)
 	/* Enable global interrupts so that the USB stack can function */
 	GlobalInterruptEnable();
 
-	while (RunBootloader)
+	while (quit_delay)
 	{
+		/* If told to quit, we continue a bit to give time to the host
+		 * to close stuff */
+		if (!RunBootloader)
+			quit_delay--;
+
+		/* Main tasks */
 		CDC_Task();
 		USB_USBTask();
 	}
+
+	Delay_MS(250);
 
 	/* Disconnect from the host - USB interface will be reset later along with the AVR */
 	USB_Detach();
