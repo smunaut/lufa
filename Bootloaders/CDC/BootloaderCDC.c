@@ -87,6 +87,12 @@ void Application_Jump_Check(void)
 		JTAG_ENABLE();
 	#endif
 
+	/* If the reset was power on and there is a valid application, skip the bootloader */
+	if ((MCUSR & _BV(PORF) && pgm_read_word_near(0) != 0xFFFF)) {
+		MCUSR &= ~_BV(PORF);
+		JumpToApplication |= true;
+	}
+
 	/* If the reset source was the bootloader and the key is correct, clear it and jump to the application */
 	if ((MCUSR & (1 << WDRF)) && (MagicBootKey == MAGIC_BOOT_KEY))
 	  JumpToApplication |= true;
